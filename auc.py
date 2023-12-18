@@ -55,6 +55,8 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('Receiver Operating Characteristic (ROC) Curve')
 plt.legend(loc='lower right')
+plt.savefig('../../../fairness-analysis/auc-curve.pdf')
+
 plt.show()
 
 
@@ -85,8 +87,8 @@ plt.xlabel('Mean Predicted Probability')
 plt.ylabel('Fraction of Positives')
 plt.title('Calibration Curve')
 plt.legend()
-plt.show()
 
+plt.show()
 
 
 #----
@@ -114,6 +116,7 @@ plt.legend()
 plt.xlim(0, 0.4)  # Adjust as needed
 plt.ylim(0, 0.4)  # Adjust as needed
 
+plt.savefig('../../../fairness-analysis/seven-equal-bins-calibr.pdf')
 plt.show()
 
 
@@ -135,9 +138,9 @@ plt.legend()
 plt.xlim(0, 0.2)  # Adjust as needed
 plt.ylim(0, 0.2)  # Adjust as needed
 
+
+plt.savefig('../../../fairness-analysis/five-quantiles-calibr.pdf')
 plt.show()
-
-
 
 
 #Considering your probability distribution statistics (min: 0.000, 1st qu: 0.550, median: 1.730, mean: 3.019, 3rd qu: 3.955, max: 32.930), you might want to use a combination of the strategies mentioned. 
