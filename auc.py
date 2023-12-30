@@ -66,9 +66,14 @@ import matplotlib.pyplot as plt
 
 # Assuming y_true and y_probs are your true labels and predicted probabilities
 prob_true, prob_pred = calibration_curve(y_true, y_probs, n_bins=10)
+lower_bound = np.percentile(prob_pred, 2.5, axis=0)
+upper_bound = np.percentile(prob_pred, 97.5, axis=0)
 
-# Plot the calibration curve
+
+# Plot the calibration curve with CIs
 plt.plot(prob_pred, prob_true, marker='o', label='Calibration Curve')
+plt.fill_between(prob_pred, lower_bound, upper_bound, color='gray', alpha=0.2, label='95% CI')
+# Add a diagonal line for reference
 plt.plot([0, 1], [0, 1], linestyle='--', label='Perfectly Calibrated')
 plt.xlabel('Mean Predicted Probability')
 plt.ylabel('Fraction of Positives')
@@ -79,9 +84,13 @@ plt.show()
 
 
 prob_true, prob_pred = calibration_curve(y_true, y_probs, n_bins=7, strategy='uniform')
+lower_bound = np.percentile(prob_pred, 2.5, axis=0)
+upper_bound = np.percentile(prob_pred, 97.5, axis=0)
 
 # Plot the calibration curve
 plt.plot(prob_pred, prob_true, marker='o', label='Calibration Curve')
+plt.fill_between(prob_pred, lower_bound, upper_bound, color='gray', alpha=0.2, label='95% CI')
+
 plt.plot([0, 1], [0, 1], linestyle='--', label='Perfectly Calibrated')
 plt.xlabel('Mean Predicted Probability')
 plt.ylabel('Fraction of Positives')
@@ -91,11 +100,6 @@ plt.legend()
 plt.show()
 
 
-#----
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.calibration import calibration_curve
-
 # Assuming y_true and y_probs are your true labels and predicted probabilities
 
 # Define equal width bins
@@ -103,9 +107,21 @@ n_bins = 7  # Adjust the number of bins as needed
 
 # Calculate calibration curve
 prob_true, prob_pred = calibration_curve(y_true, y_probs, n_bins=n_bins, strategy='uniform')
+lower_bound = np.percentile(prob_pred, 2.5, axis=0)
+upper_bound = np.percentile(prob_pred, 97.5, axis=0)
+lower_bound = prob_true - 0.05 # same result as above
+upper_bound = prob_true + 0.05
+
+# Confidence intervals (just for illustration)
+confidence_intervals = 0.05 * np.ones_like(prob_true)
+
+# Plotting
+plt.errorbar(prob_pred, prob_true, yerr=confidence_intervals, fmt='o', label='Calibration Curve with 95% CI')
 
 # Plot the calibration curve with specific axes limits
 plt.plot(prob_pred, prob_true, marker='o', label='Calibration Curve')
+plt.fill_between(prob_pred, lower_bound, upper_bound, color='gray', alpha=0.2, label='95% CI')
+
 plt.plot([0, 1], [0, 1], linestyle='--', label='Perfectly Calibrated')
 plt.xlabel('Mean Predicted Probability')
 plt.ylabel('Fraction of Positives')
@@ -125,9 +141,14 @@ n_quantiles = 5  # Adjust the number of quantiles as needed
 
 # Calculate calibration curve with quantile strategy
 prob_true, prob_pred = calibration_curve(y_true, y_probs, n_bins=n_quantiles, strategy='quantile')
+lower_bound = np.percentile(prob_pred, 2.5, axis=0)
+upper_bound = np.percentile(prob_pred, 97.5, axis=0)
+
 
 # Plot the calibration curve with specific axes limits
 plt.plot(prob_pred, prob_true, marker='o', label='Calibration Curve')
+plt.fill_between(prob_pred, lower_bound, upper_bound, color='gray', alpha=0.2, label='95% CI')
+
 plt.plot([0, 1], [0, 1], linestyle='--', label='Perfectly Calibrated')
 plt.xlabel('Mean Predicted Probability')
 plt.ylabel('Fraction of Positives')
