@@ -6,11 +6,30 @@ import pandas as pd
 
 # Set the working directory
 # path where the data is located
-working_directory = '../Desktop/lung-health-dataset/LHC_data_anon_20230831'
-os.chdir(working_directory)
+
+# Desired working directory
+desired_directory = '../Desktop/lung-health-dataset/LHC_data_anon_20230831'
+
+# Check the current working directory
+current_directory = os.getcwd()
+
+# Print the current working directory
+print("Current Working Directory:", current_directory)
+
+# Check if the current directory is not the desired directory
+if current_directory != desired_directory:
+    try:
+        # Change the working directory to the desired directory
+        os.chdir(desired_directory)
+        print(f"Changed working directory to: {desired_directory}")
+    except FileNotFoundError:
+        print(f"The desired directory '{desired_directory}' does not exist.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
 
 # Load data using pandas
-# Replace 'your_data_file.csv' with the actual name of your data file
 data_file = 'lhcdata_mcip_anon.xlsx'
 df = pd.read_excel(data_file)
 
@@ -21,7 +40,7 @@ print(df.head())
 min_age = df['age'].min()
 max_age = df['age'].max()
 
-# Define the number of age groups (adjust as needed)
+# Define the number of age groups 
 num_age_groups = 5
 
 # Create age bins
@@ -89,4 +108,4 @@ smok_cpd_group_counts = df['Smok_CPD_Group'].value_counts()
 for smok_cpd_group, count in smok_cpd_group_counts.items():
     print(f"Cigarettes-per-day Range for '{smok_cpd_group}': {smok_cpd_group}, Count: {count}")
 
-    
+df.to_csv('dataframe_with_groups.csv', index=False) 

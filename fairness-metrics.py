@@ -57,5 +57,3 @@ print(demographic_parity_disparity)
 # Additional metrics
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
-
-

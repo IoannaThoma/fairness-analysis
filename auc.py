@@ -19,6 +19,7 @@ df = pd.read_excel(data_file)
 print(df.head())
 
 # Filter rows based on the specified condition
+# remove those who did not receive a scan although they were eligible and reffered for one
 condition = ~(df['yn_eligplco'] == 1) | ~(df['yn_t00ldct'] == 0)
 filtered_df = df[condition]
 
@@ -40,7 +41,7 @@ print("ROC AUC Score:", roc_auc)
 
 from sklearn.metrics import roc_curve
 
-# Assuming y_true and y_scores are your true labels and predicted scores
+# Assuming y_true and y_probs are your true labels and predicted scores
 fpr, tpr, thresholds = roc_curve(y_true, y_probs)
 
 # fpr is the False Positive Rate
@@ -58,7 +59,45 @@ plt.legend(loc='lower right')
 plt.savefig('../../../fairness-analysis/auc-curve.pdf')
 
 plt.show()
+##################################
+# adding confidence intervals in AUC 
 
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+from sklearn.utils import resample
+
+# Assuming you have your true labels (y_true) and predicted probabilities (y_probs) ready
+
+# Perform bootstrapping to calculate confidence intervals for AUC
+n_bootstraps = 1000
+auc_values = []
+
+for i in range(n_bootstraps):
+    indices = resample(range(len(y_true)))
+    fpr_bootstrap, tpr_bootstrap, i = roc_curve(y_true[indices], y_probs[indices])
+    auc_values.append(auc(fpr_bootstrap, tpr_bootstrap))
+
+# Calculate the confidence interval (e.g., 95%)
+lower_bound = np.percentile(auc_values, 2.5)
+upper_bound = np.percentile(auc_values, 97.5)
+
+# Plot the ROC curve
+plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (AUC = {:.2f} [{:.2f}-{:.2f}])'.format(roc_auc, lower_bound, upper_bound))
+plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+
+# Add labels and legend
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic (ROC) Curve')
+plt.legend(loc='lower right')
+plt.savefig('../../../fairness-analysis/roc-curve-with-ci.pdf')
+
+# Display the plot
+plt.show()
+#########################
+
+# Calibration curves
 
 from sklearn.calibration import calibration_curve
 import matplotlib.pyplot as plt
@@ -82,6 +121,35 @@ plt.legend()
 plt.show()
 
 
+#### Calibration Curve with Confidence Interval
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.calibration import calibration_curve
+
+# Assuming you have your true labels (y_true) and predicted probabilities (y_probs) ready
+
+# Calculate calibration curve and confidence intervals
+prob_true, prob_pred = calibration_curve(y_true, y_probs, n_bins=100)
+lower_bound = np.percentile(prob_pred, 2.5, axis=0)
+upper_bound = np.percentile(prob_pred, 97.5, axis=0)
+
+# Plot the calibration curve with different colors for upper and lower bounds
+plt.plot(prob_pred, prob_true, marker='o', label='Calibration Curve', color='blue')
+plt.fill_between(prob_pred, lower_bound, upper_bound, color='lightblue', alpha=0.2, label='95% CI', edgecolor='none')
+
+# Add numerical values to the label
+ci_label = '95% CI [{:.2f}-{:.2f}]'.format(np.percentile(lower_bound, 2.5), np.percentile(upper_bound, 97.5))
+
+# Add labels and legend
+plt.xlabel('Mean Predicted Probability')
+plt.ylabel('Fraction of Positives')
+plt.title(f'Calibration Curve with Confidence Interval ({ci_label})')
+plt.legend(loc='upper right')
+plt.savefig('../../../fairness-analysis/calib-curve-bins100-ci.pdf')
+
+# Display the plot
+plt.show()
+##########################
 
 prob_true, prob_pred = calibration_curve(y_true, y_probs, n_bins=7, strategy='uniform')
 lower_bound = np.percentile(prob_pred, 2.5, axis=0)

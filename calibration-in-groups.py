@@ -6,7 +6,9 @@ from sklearn.metrics import brier_score_loss
 from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 
-# Generate some sample data (replace this with your dataset)
+## make an example first ##
+
+# Generate sample data
 np.random.seed(42)
 data = pd.DataFrame({
     'Age': np.random.randint(18, 80, 1000),
@@ -17,7 +19,7 @@ data = pd.DataFrame({
 # Split the data into training and testing sets
 train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
 
-# Train a classifier (replace this with your model training)
+# Train a classifier
 classifier = RandomForestClassifier()
 classifier.fit(train_data[['Age']], train_data['Target'])
 
@@ -50,35 +52,74 @@ plt.xlabel('Mean Predicted Probability')
 plt.ylabel('Fraction of Positives')
 plt.title('Calibration Curves for Different Age Groups and Sex')
 plt.legend()
+plt.savefig('../../../fairness-analysis/calib-curve-groups-example.pdf')
+
 plt.show()
+## example ends ##
 
 
 
+
+## application ##
+df = pd.read_csv('dataframe_with_groups')
 
 # Assuming you have a DataFrame df with a column 'predicted_prob' for predicted probabilities and 'actual_label' for true labels
 # You also have a column 'group_variable' indicating the groups
 
 # List of unique values in the 'group_variable' column
-group_values = df['Smok_CPD_Group'].unique()
+group_values = df['education_group'].unique()
+
 
 # Create a figure and axis
 fig, ax = plt.subplots()
 
 # Iterate over each group and plot the calibration curve
 for group_value in group_values:
-    group_df = df[df['Smok_CPD_Group'] == group_value]
-    
-    # Calculate calibration curve
-    prob_true, prob_pred = calibration_curve(group_df['smok_cpd'], group_df['y_probs'], n_bins=10)
-    
-    # Plot calibration curve
-    ax.plot(prob_pred, prob_true, label=f'Group {group_value}')
+    group_df = df[df['education_group'] == group_value].copy()  # Make a copy to avoid SettingWithCopyWarning
+    y_true = np.array(group_df['yn_lc_all'])
+    y_probs = np.array(group_df['plco']/100)
+    # Calculate calibration curve    
+    prob_true, prob_pred = calibration_curve(y_true, y_probs, n_bins=100)
 
-# Customize the plot
+    # Plot calibration curve
+    ax.plot(y_probs, y_true, label=f'Group {group_value}')
+
+# Customise the plot
 ax.set_xlabel('Mean Predicted Probability')
 ax.set_ylabel('Fraction of Positives')
 ax.set_title('Calibration Curves for Different Groups')
 ax.legend(loc='best')
+plt.savefig('../../../fairness-analysis/calib-curve-education-grp.pdf')
+
+# Show the plot
+plt.show()
+
+#######
+
+# List of unique values in the 'group_variable' column
+group_values = df['Age_Group'].unique()
+
+# Create a figure and axis
+fig, ax = plt.subplots()
+
+# Iterate over each group and plot the calibration curve
+for group_value in group_values:
+    group_df = df[df['Age_Group'] == group_value].copy()  # Make a copy to avoid SettingWithCopyWarning
+    
+    y_true = np.array(group_df['yn_lc_all'])
+    y_probs = np.array(group_df['plco']/100)    
+    # Calculate calibration curve    
+    prob_true, prob_pred = calibration_curve(y_true, y_probs, n_bins=10)
+    
+    # Plot calibration curve
+    ax.plot(prob_pred, prob_true, label=f'Group {group_value}')
+
+# Customise the plot
+ax.set_xlabel('Mean Predicted Probability')
+ax.set_ylabel('Fraction of Positives')
+ax.set_title('Calibration Curves for Different Groups')
+ax.legend(loc='best')
+plt.savefig('../../../fairness-analysis/calib-curve-age-grp.pdf')
 
 # Show the plot
 plt.show()
